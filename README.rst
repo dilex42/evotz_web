@@ -45,9 +45,9 @@ For Windows:
 
  - python -m venv %VENV%
 
- - %VENV%\Scripts\python setup.py develop
+ - %VENV%\\Scripts\\python setup.py develop
 
- - %VENV%\Scripts\python runapp.py
+ - %VENV%\\Scripts\\python runapp.py
 
 For Linux :
  - git clone https://github.com/dilex42/evotz_web.git
@@ -64,10 +64,10 @@ For Linux :
 
 MongoDB setup :
 
-You need to install MongoDB and create an Instance. See detailed `official manual
-<https://docs.mongodb.com/manual/>`_.
+  You need to install MongoDB and create an Instance. See detailed `official manual
+  <https://docs.mongodb.com/manual/>`_.
 
-Then you need to set MONGODB_URI environmental variable to mongodb://MONGODB_USER:MONGODB_PASSWD@MONGODB_HOST:port/MONGODB_NAME
+  Then you need to set MONGODB_URI environmental variable to mongodb://MONGODB_USER:MONGODB_PASSWD@MONGODB_HOST:port/MONGODB_NAME
 
 Examples :
  - Windows : set MONGODB_URI=mongodb://me:123456@localhost:59806/my_db
