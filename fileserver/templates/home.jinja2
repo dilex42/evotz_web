@@ -72,10 +72,12 @@
         if(response.status === "OK"){
             var resultsText = document.createTextNode("File uploaded");
             var a = document.createElement('a');
-            var linkText = document.createTextNode("Share");
+            var linkText = document.createTextNode("Here");
             a.appendChild(linkText);
             a.href = "/d"+response.file_id;
+            a.setAttribute("target", "_blank");
             resultsContent.appendChild(a);
+            resultsContent.appendChild(document.createTextNode(" is the link for downloading your file."))
             var accessEl = document.createElement("div")
             var a = document.createElement('a');
             {% if request.authenticated_userid %}
@@ -90,7 +92,7 @@
             a.appendChild(linkText);
             a.href = "/login";
             accessEl.appendChild(a);
-            var accessText = document.createTextNode(" to see more info about your files");
+            var accessText = document.createTextNode(" to see more info about your files.");
             accessEl.appendChild(accessText);
             {% endif %}
             resultsContent.appendChild(accessEl)

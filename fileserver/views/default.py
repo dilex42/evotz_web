@@ -45,7 +45,7 @@ def upload_file(request) :
         description = request.POST['description']
         expires = request.POST['expires']
         filename = file_data.filename
-        file_name,file_ext = filename.split('.')
+        file_name,*_,file_ext = filename.split('.')
         if is_latin(file_name) :
             new_filename = file_name
         else :
