@@ -65,7 +65,7 @@ For Linux :
 MongoDB setup :
 
   You need to install MongoDB and create an Instance. See detailed `official manual
-<https://docs.mongodb.com/manual/>`_.
+  <https://docs.mongodb.com/manual/>`_.
 
   Then you need to set MONGODB_URI environmental variable to mongodb://MONGODB_USER:MONGODB_PASSWD@MONGODB_HOST:port/MONGODB_NAME
 
@@ -73,7 +73,7 @@ MongoDB setup :
 
    - Windows : set MONGODB_URI=mongodb://me:123456@localhost:59806/my_db
 
-   - Linux : export MONGODB_URI=mongodb://heroku_sada223:23fsddgs4sdfds@ds259806.mlab.com:59806/heroku_sada223
+   - Linux : export MONGODB_URI=mongodb://heroku_sada223:23fsddgs4sdfds@ds23576.mlab.com:59806/heroku_sada223
 
 Tests
 -----
