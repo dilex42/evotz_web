@@ -50,8 +50,9 @@ def upload_file(request) :
             new_filename = file_name
         else :
             new_filename = 'uploaded_file'
-            description = 'Original filename : ' + file_name + '||   Your description : ' + description
         new_filename += '.'+file_ext
+        if new_filename != filename :
+            description = 'Original filename : ' + filename + '  ||   Your description : ' + description
         new_file = mymodel.Files()
         new_file.file.put(file_data.file, content_type = file_data.type, file_name = new_filename)
         if description :

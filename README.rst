@@ -22,6 +22,8 @@ App capabilities
 
 - !Warning! Due to being demo app you could upload files only up to 25 MB.
 
+- !Warnong! Server time is UTC+0.
+
 Technologies used
 -----------------
 
