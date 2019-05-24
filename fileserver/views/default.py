@@ -29,36 +29,33 @@ def my_view(request):
         meta.next_check = meta.next_check+datetime.timedelta(hours=1)
         meta.save()
     form = UploadForm(request.POST)
-    form.expires.process_data(datetime.datetime.now())
-    return {'username': request.authenticated_userid, 'form':form}
+    form.expires.process_data(datetime.datetime.now()+datetime.timedelta(hours=1))
+    return {'username': request.authenticated_userid, 'form':form, 'title' :'Home page'}
 
-@view_config(route_name='upload', renderer='../templates/mytemplate.jinja2')
+@view_config(route_name='upload')
 def upload_file(request) :
     form = UploadForm(request.POST)
     if request.method == 'POST' :
         if not form.validate():
-            print(form.expires)
-            return Response(json={'status':'Error','errors':form.errors,'sss':222})
+            return Response(json={'status':'Error','errors':form.errors})
         file_data = request.POST['file']
+        if file_data.bytes_read >26214400 :
+            form.file_input.errors.append('File too big. Please select file less than 25MB.')
+            return Response(json={'status':'Error','errors':form.errors})
         description = request.POST['description']
         expires = request.POST['expires']
-        print(description)
-        print(expires)
-        print(file_data.type)
-        print(file_data.file)
-        print(file_data.name)
         filename = file_data.filename
         file_name,file_ext = filename.split('.')
-        print(file_ext)
         if is_latin(file_name) :
             new_filename = file_name
         else :
             new_filename = 'uploaded_file'
+            description = 'Original filename : ' + file_name + '||   Your description : ' + description
         new_filename += '.'+file_ext
-        print(new_filename)
         new_file = mymodel.Files()
         new_file.file.put(file_data.file, content_type = file_data.type, file_name = new_filename)
-        new_file.description = description
+        if description :
+            new_file.description = description
         new_file.expires_at = expires
         if request.authenticated_userid :
             user = mymodel.Users.by_name(request.authenticated_userid)
@@ -84,41 +81,7 @@ def download_file(request):
         my_file.delete()
         raise HTTPNotFound()
     file_body = my_file.file
-    print(my_file.id)
-    print(my_file.user.username)
     return Response(body=file_body.read(),content_type=file_body.content_type,content_disposition='attachment; filename=%s' % (file_body.file_name),charset='utf-8')
-
-@view_config(route_name='login',renderer='fileserver:templates/login.jinja2')
-@forbidden_view_config(renderer='../templates/login.jinja2')
-def login(request):
-    if request.authenticated_userid :
-        return HTTPFound(location=request.route_url('home'))
-    form = CredentialsForm(request.POST)
-    if request.method == 'POST' and form.validate():
-        print(form.username.data)
-        u = mymodel.Users.by_name(form.username.data)
-        print(u)
-        if u and u.verify_password(form.password.data.encode('utf8')):
-            return HTTPFound(location=request.route_url('home'), headers=remember(request,u.username))
-        form.username.errors.append('Wrong passowrd or username')
-        return {'form' :form}
-    return {'form': form}
-
-@view_config(route_name='register',renderer='fileserver:templates/register.jinja2')
-def register(request) :
-    if request.authenticated_userid :
-        return HTTPFound(location=request.route_url('home'))
-    form = CredentialsForm(request.POST)
-    if request.method == 'POST' and form.validate():
-        u = mymodel.Users(username=form.username.data)
-        u.set_password(form.password.data.encode('utf8'))
-        u.save()
-        return HTTPFound(location=request.route_url('home'), headers=remember(request,u.username))
-    return {'form' : form}
-
-@view_config(route_name='logout',permission='manage')
-def log_out(request) :
-    return HTTPFound(location=request.route_url('home'), headers=forget(request))
 
 @view_config(route_name='preview')
 def preview_file(request):
@@ -134,22 +97,55 @@ def preview_file(request):
         my_file.delete()
         raise HTTPNotFound()
     file_body = my_file.file
-    print(my_file.id)
-    print(my_file.user.username)
     return Response(body=file_body.read(),content_type=file_body.content_type,content_disposition='filename=%s' % (file_body.file_name),charset='utf-8')
 
+@view_config(route_name='login',renderer='fileserver:templates/login.jinja2')
+@forbidden_view_config(renderer='fileserver:/templates/login.jinja2')
+def login(request):
+    if request.authenticated_userid :
+        return HTTPFound(location=request.route_url('home'))
+    form = CredentialsForm(request.POST)
+    if request.method == 'POST' and form.validate():
+        u = mymodel.Users.by_name(form.username.data)
+        if u and u.verify_password(form.password.data.encode('utf8')):
+            return HTTPFound(location=request.route_url('home'), headers=remember(request,u.username))
+        form.username.errors.append('Wrong password or username')
+        return {'form' :form,'title' : 'Sign In'}
+    return {'form': form,'title' : 'Sign In'}
+
+@view_config(route_name='register',renderer='fileserver:templates/register.jinja2')
+def register(request) :
+    if request.authenticated_userid :
+        return HTTPFound(location=request.route_url('home'))
+    form = CredentialsForm(request.POST)
+    if request.method == 'POST' and form.validate():
+        u = mymodel.Users(username=form.username.data)
+        u.set_password(form.password.data.encode('utf8'))
+        try:
+            u.save()
+        except mongoengine.errors.NotUniqueError as e:
+            form.username.errors.append('Username already taken')
+            return {'form' : form,'title':'Sign Up'} 
+        return HTTPFound(location=request.route_url('home'), headers=remember(request,u.username))
+    return {'form' : form,'title':'Sign Up'}
+
+@view_config(route_name='logout',permission='manage')
+def log_out(request) :
+    return HTTPFound(location=request.route_url('home'), headers=forget(request))
 
 @view_config(route_name='userfiles',permission='manage',renderer='fileserver:templates/userfiles.jinja2')
 def user_files(request):
     user = mymodel.Users.by_name(request.authenticated_userid)
     files = mymodel.Files.objects(user=user)
-    return {'files':files}
+    return {'files':files,'username':request.authenticated_userid,'title':'My files'}
 
 
 @view_config(route_name='delete',permission='manage')
 def delete_file(request):
     file_id = request.matchdict.get('file_id','no id')
     my_file = mymodel.Files.objects(id=file_id).first()
+    if not my_file :
+        return HTTPFound(location=request.route_url('userfiles'))
     user = mymodel.Users.by_name(request.authenticated_userid)
     if my_file.user != user :
         return Response('No rights')
@@ -157,8 +153,7 @@ def delete_file(request):
     my_file.delete()
     return HTTPFound(location=request.route_url('userfiles'))
 
-
-@notfound_view_config(renderer='../templates/404.jinja2')
+@notfound_view_config(renderer='fileserver:/templates/404.jinja2')
 def notfound_view(request):
     request.response.status = 404
-    return {}
+    return {'username':request.authenticated_userid}

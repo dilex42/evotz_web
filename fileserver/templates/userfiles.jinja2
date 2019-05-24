@@ -1,17 +1,29 @@
-
- <h1>Files</h1>
-
-        {% for file in files %}
-        <div>
-            <span>{{ file.file.file_name }}</span>
-            <span><label>Description :</label>{{ file.description }}</span>
-            <span><a href="{{request.route_url('preview',file_id=file.id)}}" target="_blank">Preview</a></span>
-            <span><a href="{{request.route_url('download',file_id=file.id)}}" target="_blank">Download</a></span>
-            <span><a href="{{request.route_url('delete',file_id=file.id)}}" target="_self">Delete</a></span>
-            <span><label>Expires at :</label>{{ file.expires_at }}</span>
-            </div>
+{% extends "layout.jinja2" %}
+{% block content %}
+ <h1 align="center">My Files</h1>
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th>Filename</th>
+            <th>Description</th>
+            <th>Preview</th>
+            <th>Download</th>
+            <th>Expires at</th>
+            <th>Delete</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for file in files %}
+        <tr>
+            <td>{{ file.file.file_name }}</td>
+            <td>{{ file.description }}</td>
+            <td><a href="{{request.route_url('preview',file_id=file.id)}}" target="_blank">Preview</a></td>
+            <td><a href="{{request.route_url('download',file_id=file.id)}}" target="_blank">Download</a></td>
+            <td>{{ file.expires_at }}</td>
+            <td><a href="{{request.route_url('delete',file_id=file.id)}}" target="_self">Delete</a></td>
+        </tr>
         {% endfor %}
+    </tbody>
+</table>
 
-
-    <p><a href="{{request.route_url('home')}}">Go Back</a></p>
-
+{% endblock content %}

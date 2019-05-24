@@ -1,32 +1,15 @@
+{% extends "layout.jinja2" %}
+{% block content %}
+<div class="col-md-6 col-md-offset-6">
+<h1>Sign In</h1>
+</div>
 
- <h1>Sign In</h1>
 
-    <form action="{{request.route_url('login')}}" method="post" class="form">
+    <form action="{{request.route_url('login')}}" method="post" class="form-horizontal">
 
-        {% for error in form.username.errors %}
-            <div class="error">{{ error }}</div>
-        {% endfor %}
-
-        <div class="form-group">
-            <label for="title">{{form.username.label}}</label>
-            {{form.username(class_='form-control')}}
-        </div>
-
-        {% for error in form.password.errors %}
-            <div class="error">{{error}}</div>
-        {% endfor %}
-
-        <div class="form-group">
-            <label for="body">{{form.password.label}}</label>
-            {{form.password(class_='form-control')}}
-        </div>
-        <div class="form-group">
-            <label></label>
-            <button type="submit" class="btn btn-default">Submit</button>
-        </div>
+        {% include 'credentials.jinja2' %}
 
 
     </form>
-    <p><a href="{{request.route_url('register')}}">Sign Up</a></p>
-    <p><a href="{{request.route_url('home')}}">Go Back</a></p>
 
+{% endblock content %}

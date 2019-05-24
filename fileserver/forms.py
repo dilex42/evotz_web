@@ -5,6 +5,6 @@ class CredentialsForm(Form) :
     password = PasswordField('Password', [validators.Length(min=3)])
 
 class UploadForm(Form) :
-    file = FileField('File')
+    file_input = FileField('File')
     description = TextAreaField('Description', [validators.Length(max=42)])
     expires = DateTimeField('Expires at',[validators.DataRequired()])

@@ -1,62 +1,57 @@
+{% extends "layout.jinja2" %}
+{% block content %}
 
 
-<div class="content">
-{% if request.authenticated_userid %}
-  <p class="lead">Welcome <span class="font-normal">{{username}}</span></p>
-  <p><a href="{{request.route_url('logout')}}">Sign Out</a></p>
-  <p><a href="{{request.route_url('userfiles')}}">My files</a></p>
-{% else %}
-<p><a href="{{request.route_url('login')}}">Sign In</a></p>
-<p><a href="{{request.route_url('register')}}">Sign Up</a></p>
-{% endif %}
-</div>
-
-
-<form enctype="multipart/form-data" method="post" class="form">
-<div>
-    <span id="results"></span>
+<div class="col-md-12">
+<form enctype="multipart/form-data" method="post" class="form-horizontal">
+<div id="results" class="col-md-5 col-md-offset-4">
 </div>
        
     
         <div class="form-group">
-            <label for="title">{{form.file.label}}</label>
-            {{form.file(id='file_input')}}
+            {{form.file_input.label(class='col-md-1 col-md-offset-3 control-label')}}
+            <div class="col-md-5">
+            {{form.file_input(class='form-control')}}
+            </div>
         </div>
 
         <div class="form-group">
-            <label for="body">{{form.description.label}}</label>
-            {{form.description(class_='form-control')}}
+            {{form.description.label(class='col-md-1 col-md-offset-3 control-label')}}
+            <div class="col-md-5">
+            {{form.description(class_='form-control',placeholder='File description')}}
+            </div>
         </div>
 
         <div class="form-group">
-            <label for="body">{{form.expires.label}}</label>
-            {{form.expires}}
+            {{form.expires.label(class='col-md-1 col-md-offset-3 control-label')}}
+            <div class="col-md-5">
+            {{form.expires(class_='form-control')}}
+            </div>
         </div>
 
         <div class="form-group">
-            <label></label>
-            <button type="button" id="send_file" class="btn btn-default">Send</button>
+        <div class="col-md-6 col-md-offset-6">
+            <button type="button" id="send_file" class="btn btn-default">Upload</button>
+        </div>
         </div>
 
 
     </form>
-
+</div>
 
 <script type="text/javascript">
 (function() {
   document.getElementById("send_file").onclick = function(){
-    console.log(document.getElementById("file_input").files);
     var files = document.getElementById("file_input").files;
     var file = files[0];
     if(!file){
       return alert("No file selected.");
     }
-    console.log(file);
+    if (file.size>26214400) {
+      return alert("File too big. Please select file less than 25MB.");  
+    }
     var description = document.getElementById("description").value;
-    // var expires = new Date(document.getElementById("expires").value);
     var expires = document.getElementById("expires").value;
-    console.log(description);
-    console.log(expires);
     var xhr = new XMLHttpRequest();
     xhr.open("POST", "/upload");
     var postData = new FormData();
@@ -69,6 +64,8 @@
         console.log(response);
         var resultsDiv = document.getElementById("results");
         var resultsSummary = document.createElement("div");
+        var resultsContent = document.createElement("div");
+        resultsContent.classList.add("bg-info");
         while(resultsDiv.firstChild) {
             resultsDiv.removeChild(resultsDiv.firstChild);
         }
@@ -78,50 +75,55 @@
             var linkText = document.createTextNode("Share");
             a.appendChild(linkText);
             a.href = "/d"+response.file_id;
-            resultsDiv.appendChild(a);
-            if ("{{request.authenticated_userid}}" !="None") {
-                var accessEl = document.createElement("div")
-                var accessText = document.createTextNode("You can see more info about your files ");
-                accessEl.appendChild(accessText);
-                var a = document.createElement('a');
-                var linkText = document.createTextNode("here");
-                a.appendChild(linkText);
-                a.href = "/myfiles";
-                accessEl.appendChild(a);
-            }
-            else {
-                var accessEl = document.createElement("div")
-                var a = document.createElement('a');
-                var linkText = document.createTextNode("Sign In");
-                a.appendChild(linkText);
-                a.href = "/login";
-                accessEl.appendChild(a);
-                var accessText = document.createTextNode(" to see more info about your files");
-                accessEl.appendChild(accessText);
-            }
-            resultsDiv.appendChild(accessEl)
-            document.getElementById("file_input").value = "";
-            document.getElementById("description").value = "";            
+            resultsContent.appendChild(a);
+            var accessEl = document.createElement("div")
+            var a = document.createElement('a');
+            {% if request.authenticated_userid %}
+            var accessText = document.createTextNode("You can see more info about your files ");
+            accessEl.appendChild(accessText);
+            var linkText = document.createTextNode("here");
+            a.appendChild(linkText);
+            a.href = "/myfiles";
+            accessEl.appendChild(a);
+            {% else %}
+            var linkText = document.createTextNode("Sign In");
+            a.appendChild(linkText);
+            a.href = "/login";
+            accessEl.appendChild(a);
+            var accessText = document.createTextNode(" to see more info about your files");
+            accessEl.appendChild(accessText);
+            {% endif %}
+            resultsContent.appendChild(accessEl)
+            document.getElementById("file_input").value = null;
+            document.getElementById("description").value = null;
+            resultsSummary.classList.add("bg-success");
         }
         else if(response.status === "Error") {
             var resultsText = document.createTextNode("Error");
             var errorsList = document.createElement("ul");
             for (var error in response.errors) {
+                var formError = document.getElementById(error);
+                formError.parentNode.classList.add("has-error");
                 var errorItem = document.createElement("li");
                 var errorText = document.createTextNode("Field " + error+" : "+response.errors[error]);
                 errorItem.appendChild(errorText);
                 errorsList.appendChild(errorItem);
             }
-            resultsDiv.appendChild(errorsList);
+            resultsContent.appendChild(errorsList);
+            resultsSummary.classList.add("bg-danger");
         }
         else if(response.status === "Bad") {
             var resultsText = document.createTextNode("Error writing to database. Try again later or contact us");
+            resultsSummary.classList.add("bg-danger");
         }
         else{
             var resultsText = document.createTextNode("Oops. Something went wrong");
+            resultsSummary.classList.add("bg-warning");
         }
         resultsSummary.appendChild(resultsText);
-        resultsDiv.insertAdjacentElement('afterbegin',resultsSummary);
+        // resultsDiv.insertAdjacentElement('afterbegin',resultsSummary);
+        resultsDiv.appendChild(resultsSummary);
+        resultsDiv.appendChild(resultsContent);
 
    }
   };
@@ -130,3 +132,4 @@
 })();
 </script>
 
+{% endblock content %}
