@@ -1,0 +1,3 @@
+[run]
+source = fileserver
+omit = fileserver/test*

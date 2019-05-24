@@ -1,0 +1,17 @@
+
+ <h1>Files</h1>
+
+        {% for file in files %}
+        <div>
+            <span>{{ file.file.file_name }}</span>
+            <span><label>Description :</label>{{ file.description }}</span>
+            <span><a href="{{request.route_url('preview',file_id=file.id)}}" target="_blank">Preview</a></span>
+            <span><a href="{{request.route_url('download',file_id=file.id)}}" target="_blank">Download</a></span>
+            <span><a href="{{request.route_url('delete',file_id=file.id)}}" target="_self">Delete</a></span>
+            <span><label>Expires at :</label>{{ file.expires_at }}</span>
+            </div>
+        {% endfor %}
+
+
+    <p><a href="{{request.route_url('home')}}">Go Back</a></p>
+

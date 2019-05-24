@@ -1,0 +1,132 @@
+
+
+<div class="content">
+{% if request.authenticated_userid %}
+  <p class="lead">Welcome <span class="font-normal">{{username}}</span></p>
+  <p><a href="{{request.route_url('logout')}}">Sign Out</a></p>
+  <p><a href="{{request.route_url('userfiles')}}">My files</a></p>
+{% else %}
+<p><a href="{{request.route_url('login')}}">Sign In</a></p>
+<p><a href="{{request.route_url('register')}}">Sign Up</a></p>
+{% endif %}
+</div>
+
+
+<form enctype="multipart/form-data" method="post" class="form">
+<div>
+    <span id="results"></span>
+</div>
+       
+    
+        <div class="form-group">
+            <label for="title">{{form.file.label}}</label>
+            {{form.file(id='file_input')}}
+        </div>
+
+        <div class="form-group">
+            <label for="body">{{form.description.label}}</label>
+            {{form.description(class_='form-control')}}
+        </div>
+
+        <div class="form-group">
+            <label for="body">{{form.expires.label}}</label>
+            {{form.expires}}
+        </div>
+
+        <div class="form-group">
+            <label></label>
+            <button type="button" id="send_file" class="btn btn-default">Send</button>
+        </div>
+
+
+    </form>
+
+
+<script type="text/javascript">
+(function() {
+  document.getElementById("send_file").onclick = function(){
+    console.log(document.getElementById("file_input").files);
+    var files = document.getElementById("file_input").files;
+    var file = files[0];
+    if(!file){
+      return alert("No file selected.");
+    }
+    console.log(file);
+    var description = document.getElementById("description").value;
+    // var expires = new Date(document.getElementById("expires").value);
+    var expires = document.getElementById("expires").value;
+    console.log(description);
+    console.log(expires);
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "/upload");
+    var postData = new FormData();
+    postData.append('file', file);
+    postData.append('description', description);
+    postData.append('expires', expires);
+    xhr.onreadystatechange = function() {
+    if(xhr.readyState === 4){
+        var response = JSON.parse(xhr.responseText);
+        console.log(response);
+        var resultsDiv = document.getElementById("results");
+        var resultsSummary = document.createElement("div");
+        while(resultsDiv.firstChild) {
+            resultsDiv.removeChild(resultsDiv.firstChild);
+        }
+        if(response.status === "OK"){
+            var resultsText = document.createTextNode("File uploaded");
+            var a = document.createElement('a');
+            var linkText = document.createTextNode("Share");
+            a.appendChild(linkText);
+            a.href = "/d"+response.file_id;
+            resultsDiv.appendChild(a);
+            if ("{{request.authenticated_userid}}" !="None") {
+                var accessEl = document.createElement("div")
+                var accessText = document.createTextNode("You can see more info about your files ");
+                accessEl.appendChild(accessText);
+                var a = document.createElement('a');
+                var linkText = document.createTextNode("here");
+                a.appendChild(linkText);
+                a.href = "/myfiles";
+                accessEl.appendChild(a);
+            }
+            else {
+                var accessEl = document.createElement("div")
+                var a = document.createElement('a');
+                var linkText = document.createTextNode("Sign In");
+                a.appendChild(linkText);
+                a.href = "/login";
+                accessEl.appendChild(a);
+                var accessText = document.createTextNode(" to see more info about your files");
+                accessEl.appendChild(accessText);
+            }
+            resultsDiv.appendChild(accessEl)
+            document.getElementById("file_input").value = "";
+            document.getElementById("description").value = "";            
+        }
+        else if(response.status === "Error") {
+            var resultsText = document.createTextNode("Error");
+            var errorsList = document.createElement("ul");
+            for (var error in response.errors) {
+                var errorItem = document.createElement("li");
+                var errorText = document.createTextNode("Field " + error+" : "+response.errors[error]);
+                errorItem.appendChild(errorText);
+                errorsList.appendChild(errorItem);
+            }
+            resultsDiv.appendChild(errorsList);
+        }
+        else if(response.status === "Bad") {
+            var resultsText = document.createTextNode("Error writing to database. Try again later or contact us");
+        }
+        else{
+            var resultsText = document.createTextNode("Oops. Something went wrong");
+        }
+        resultsSummary.appendChild(resultsText);
+        resultsDiv.insertAdjacentElement('afterbegin',resultsSummary);
+
+   }
+  };
+    xhr.send(postData);
+  };
+})();
+</script>
+
