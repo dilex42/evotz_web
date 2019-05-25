@@ -22,7 +22,7 @@ App capabilities
 
 - !Warning! Due to being demo app you could upload files only up to 25 MB.
 
-- !Warnong! Server time is UTC+0.
+- !Warning! Server time is UTC+0.
 
 Technologies used
 -----------------
@@ -36,14 +36,14 @@ Technologies used
 Installing and Running locally
 ------------------------------
 
-Python 3.6, Pyramid 1.10 and MongoDB 4.0 are required.
+Python 3.6, Pyramid 1.10 and MongoDB 3.6 are required.
 
 For Windows:
  - git clone https://github.com/dilex42/evotz_web.git
 
  - cd evotz_web
 
- - set VENV={{path_to_evotz_web}}\env  (For ex. d:\projects\evotz_web\env)
+ - set VENV={{path_to_evotz_web}}\\env  (For ex. d:\\projects\\evotz_web\\env)
 
  - python -m venv %VENV%
 
