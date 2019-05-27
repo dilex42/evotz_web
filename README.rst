@@ -24,6 +24,8 @@ App capabilities
 
 - !Warning! Server time is UTC+0.
 
+- !Warning! Use http instead of https for custom CSS to load :(
+
 Technologies used
 -----------------
 
