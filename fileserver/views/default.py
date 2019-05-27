@@ -26,7 +26,7 @@ def my_view(request):
         for file in expired_files :
             file.file.delete()
             file.delete()
-        meta.next_check = meta.next_check+datetime.timedelta(hours=1)
+        meta.next_check = time_now+datetime.timedelta(hours=1)
         meta.save()
     form = UploadForm(request.POST)
     form.expires.process_data(datetime.datetime.now()+datetime.timedelta(hours=1))
